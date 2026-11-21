@@ -97,11 +97,8 @@ export class SearchBarComponent implements OnDestroy {
       ))
     ).subscribe(({ text, items }) => {
       if (text !== (this.searchText || '').trim()) { return; } // user already moved on
-      // While a linear search is shown, only offer codes present in the current graph
-      const inGraph = this.sharedService.graphCodes;
-      this.autocompleteItems = this.sharedService.isLinearSearchOngoing && inGraph.size > 0
-        ? items.filter((i: any) => inGraph.has(String(i._id)))
-        : items;
+      // Already filtered by the backend to codes that share a trajectory with the selected ones
+      this.autocompleteItems = items;
       this.noResultForText = text;
       this.showNoResults = this.autocompleteItems.length === 0;
       this.dropdownLoader = false;

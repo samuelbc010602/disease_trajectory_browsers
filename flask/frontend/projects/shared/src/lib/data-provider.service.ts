@@ -22,6 +22,11 @@ export class DataProviderService {
   public searchAutocompleteDropdown$ = (text: string): Observable<Object> => {
     let gender = this.sharedService.filtersGenderSelected;
     let url_string = `?g=${encodeURIComponent(gender)}&q=${encodeURIComponent(text)}`;
+    // With codes already selected, the backend only suggests codes that share a trajectory with them
+    const selected = (this.sharedService.searchBarItems || []).map((item: any) => item._id).join(',');
+    if (selected) {
+      url_string += `&with=${encodeURIComponent(selected)}`;
+    }
     return this.http.get(this.config.base_url + this.config.dropdown_search_url + url_string);
   }
   // Extra information (in sidebar) about a node or an edge, when clicking on an element in the visualization

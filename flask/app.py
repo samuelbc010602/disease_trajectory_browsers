@@ -110,6 +110,262 @@ response_cache = ResponseCache(maxsize=128)
 trajectory_cache = ResponseCache(maxsize=256)
 
 
+# ---------------------------------------------------------------------------
+# Compact edge index for /network (ptb)
+# ---------------------------------------------------------------------------
+# A broad code (e.g. N02BE) matches ~300k of ptb's 2.2M edges, twice per /network
+# request; with the 1.2 GB collection larger than Mongo's cache that takes 20-45 s.
+# The data is static, so the trajectory/edge filtering is done in Python on a
+# compact binary index (~100 MB) built once from Mongo and memory-mapped, so all
+# gunicorn workers share one copy. Only the chosen edges are then read from Mongo.
+# Results equal the Mongo pipeline: same filters, and per shared_name the first
+# edge in (trajectory, natural) order, which is what $group/$first returns when
+# scanning the data.trajectory index.
+# Only used when SEX_MODE=patient_count (ptb), so srb keeps its exact code path.
+import fcntl
+import mmap
+import struct
+import tempfile
+import time
+from array import array
+
+NETWORK_INDEX = os.environ.get("NETWORK_INDEX", "1" if SEX_MODE == "patient_count" else "0") == "1"
+
+
+class EdgeIndex:
+    MAGIC = b"NETIDX01"
+    # name -> array typecode. Arrays are stored in this order in the file.
+    ARRAYS = [
+        ("traj_off", "I"),    # [T+1] offsets into traj_codes (trajectories sorted by name)
+        ("traj_codes", "H"),  # code ids of each trajectory
+        ("edge_off", "I"),    # [T+1] offsets into the per-edge arrays (edges grouped by trajectory)
+        ("inv_off", "I"),     # [C+1] offsets into inv_tids
+        ("inv_tids", "I"),    # trajectory ids containing each code (ascending)
+        ("pc", "I"), ("mpc", "I"), ("fpc", "I"),  # patient_count, male_, female_
+        ("rr", "d"),          # relativerisk
+        ("pair", "H"),        # shared_name id
+        ("oid", "B"),         # 12-byte ObjectId per edge
+    ]
+
+    def __init__(self, path):
+        with open(path, "rb") as f:
+            self._mm = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
+        if self._mm[:8] != self.MAGIC:
+            raise ValueError("bad index file")
+        hlen = struct.unpack("<Q", self._mm[8:16])[0]
+        self.header = json.loads(self._mm[16:16 + hlen])
+        view = memoryview(self._mm)
+        for name, (tc, off, n) in self.header["arrays"].items():
+            size = array(tc).itemsize
+            setattr(self, name, view[off:off + n * size].cast(tc))
+        self.codes = self.header["codes"]
+        self.code_id = {c: i for i, c in enumerate(self.codes)}
+        self.count = self.header["count"]
+
+    # -- build ---------------------------------------------------------------
+    @classmethod
+    def build(cls, coll, path):
+        t0 = time.time()
+        traj_tmp = {}                      # trajectory -> temporary id (scan order)
+        pair_id = {}
+        e_traj = array("I")
+        cols = {k: array(tc) for k, tc in cls.ARRAYS[5:]}
+        proj = {"data.trajectory": 1, "data.shared_name": 1, "data.patient_count": 1,
+                "data.male_patient_count": 1, "data.female_patient_count": 1,
+                "data.relativerisk": 1}
+        nan = float("nan")
+        for d in coll.find({}, proj, batch_size=20000).hint([("$natural", 1)]):
+            x = d["data"]
+            e_traj.append(traj_tmp.setdefault(x["trajectory"], len(traj_tmp)))
+            cols["pc"].append(int(x["patient_count"]))
+            cols["mpc"].append(int(x["male_patient_count"]))
+            cols["fpc"].append(int(x["female_patient_count"]))
+            rr = x.get("relativerisk")
+            cols["rr"].append(rr if isinstance(rr, (int, float)) else nan)
+            cols["pair"].append(pair_id.setdefault(x["shared_name"], len(pair_id)))
+            cols["oid"].frombytes(d["_id"].binary)
+
+        # Final trajectory ids in sorted name order (= order of the data.trajectory index)
+        names = sorted(traj_tmp)
+        final = array("I", bytes(4 * len(names)))
+        for i, name in enumerate(names):
+            final[traj_tmp[name]] = i
+        del traj_tmp
+
+        # Group edges by trajectory, keeping natural order inside a trajectory
+        n_edges = len(e_traj)
+        edge_off = array("I", bytes(4 * (len(names) + 1)))
+        for t in e_traj:
+            edge_off[final[t] + 1] += 1
+        for i in range(len(names)):
+            edge_off[i + 1] += edge_off[i]
+        cursor = array("I", edge_off[:-1])
+        perm = array("I", bytes(4 * n_edges))
+        for j, t in enumerate(e_traj):
+            ft = final[t]
+            perm[cursor[ft]] = j
+            cursor[ft] += 1
+        del e_traj, cursor, final
+        out = {}
+        for k, col in cols.items():
+            if k == "oid":
+                out[k] = array("B", b"".join(col[j * 12:(j + 1) * 12].tobytes() for j in perm))
+            else:
+                out[k] = array(col.typecode, (col[j] for j in perm))
+        del cols, perm
+
+        # Trajectory codes and the code -> trajectories inverted index
+        codes = sorted({c for name in names for c in name.split("_")})
+        cid = {c: i for i, c in enumerate(codes)}
+        traj_off = array("I", [0])
+        traj_codes = array("H")
+        postings = [array("I") for _ in codes]
+        for t, name in enumerate(names):
+            ids = [cid[c] for c in name.split("_")]
+            traj_codes.extend(ids)
+            traj_off.append(len(traj_codes))
+            for i in set(ids):
+                postings[i].append(t)
+        inv_off = array("I", [0])
+        inv_tids = array("I")
+        for p in postings:
+            inv_tids.extend(p)
+            inv_off.append(len(inv_tids))
+        out.update(traj_off=traj_off, traj_codes=traj_codes, edge_off=edge_off,
+                   inv_off=inv_off, inv_tids=inv_tids)
+
+        # Write: magic | header length | JSON header | 8-byte aligned arrays
+        rel, off = {}, 0
+        for name, tc in cls.ARRAYS:
+            rel[name] = off
+            off += (len(out[name]) * out[name].itemsize + 7) // 8 * 8
+        base = 0
+        while True:  # the header holds absolute offsets, so its length depends on base
+            arrays = {name: [tc, base + rel[name], len(out[name])] for name, tc in cls.ARRAYS}
+            hbytes = json.dumps({"count": n_edges, "codes": codes, "arrays": arrays}).encode()
+            if 16 + len(hbytes) <= base:
+                break
+            base = (16 + len(hbytes) + 7) // 8 * 8 + 64
+        tmp = path + ".tmp%d" % os.getpid()
+        with open(tmp, "wb") as f:
+            f.write(cls.MAGIC + struct.pack("<Q", len(hbytes)) + hbytes)
+            for name, tc in cls.ARRAYS:
+                f.seek(arrays[name][1])
+                f.write(out[name].tobytes())
+        os.replace(tmp, path)
+        logger.warning("network index: %d edges, %d trajectories built in %.1fs -> %s",
+                       n_edges, len(names), time.time() - t0, path)
+
+    # -- queries -------------------------------------------------------------
+    def matching_trajectories(self, codes, min_len, max_len, pc_field, min_pc, max_pc, min_rr, max_rr):
+        """{name: id} of trajectories containing all codes, with length in range and at
+        least one edge with patient count and relative risk in range (= /network's first $match)."""
+        ids = [self.code_id.get(c) for c in set(codes)]
+        if not ids or None in ids:
+            return {}
+        inv_off, inv_tids = self.inv_off, self.inv_tids
+        postings = sorted((inv_tids[inv_off[i]:inv_off[i + 1]] for i in ids), key=len)
+        cand = postings[0]
+        for other in postings[1:]:
+            other = set(other)
+            cand = [t for t in cand if t in other]
+        traj_off, edge_off, rr = self.traj_off, self.edge_off, self.rr
+        pc = {"male": self.mpc, "female": self.fpc}.get(pc_field, self.pc)
+        names, codes_arr, code_names = {}, self.traj_codes, self.codes
+        for t in cand:
+            a, b = traj_off[t], traj_off[t + 1]
+            if not (min_len <= b - a <= max_len):
+                continue
+            for j in range(edge_off[t], edge_off[t + 1]):
+                if min_pc <= pc[j] <= max_pc and min_rr <= rr[j] <= max_rr:
+                    names["_".join([code_names[c] for c in codes_arr[a:b]])] = t
+                    break
+        return names
+
+    def cooccurring_codes(self, codes):
+        """All codes appearing in a trajectory together with every code in `codes`."""
+        ids = [self.code_id.get(c) for c in set(codes)]
+        if not ids or None in ids:
+            return set()
+        inv_off, inv_tids = self.inv_off, self.inv_tids
+        postings = sorted((inv_tids[inv_off[i]:inv_off[i + 1]] for i in ids), key=len)
+        cand = postings[0]
+        for other in postings[1:]:
+            other = set(other)
+            cand = [t for t in cand if t in other]
+        traj_off, traj_codes = self.traj_off, self.traj_codes
+        found = set()
+        for t in cand:
+            found.update(traj_codes[traj_off[t]:traj_off[t + 1]])
+        return {self.codes[c] for c in found}
+
+    def first_edge_ids(self, tids):
+        """ObjectIds of the first edge per shared_name over the given trajectory ids,
+        in (trajectory, natural) order (= /network's second pipeline $group/$first)."""
+        from bson import ObjectId
+        seen, out = set(), []
+        edge_off, pair, oid = self.edge_off, self.pair, self.oid
+        for t in sorted(tids):
+            for j in range(edge_off[t], edge_off[t + 1]):
+                p = pair[j]
+                if p not in seen:
+                    seen.add(p)
+                    out.append(ObjectId(oid[j * 12:(j + 1) * 12].tobytes()))
+        return out
+
+
+_edge_index = None
+
+
+def load_edge_index():
+    """Load (building it first if needed) the edge index; runs once in the background."""
+    global _edge_index
+    db_name = mongo.db.name
+    path = os.environ.get("NETWORK_INDEX_PATH") or os.path.join(
+        tempfile.gettempdir(), "network_index_%s_%s.bin" % (db_name, EDGES_COLLECTION))
+    coll = mongo.db[EDGES_COLLECTION]
+    try:
+        count = coll.estimated_document_count()
+        with open(path + ".lock", "w") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)  # one worker builds, the others wait and load
+            try:
+                idx = EdgeIndex(path)
+                if idx.count != count:
+                    raise ValueError("stale index")
+            except (OSError, ValueError):
+                EdgeIndex.build(coll, path)
+                idx = EdgeIndex(path)
+        _edge_index = idx
+    except Exception as e:
+        logger.warning("network index unavailable, using Mongo: %s", e)
+
+
+if NETWORK_INDEX:
+    threading.Thread(target=load_edge_index, daemon=True).start()
+
+
+cooccurrence_cache = ResponseCache(maxsize=256)
+
+
+def cooccurring_codes(codes, gender):
+    """Codes that share at least one trajectory with all of `codes` (for the active sex),
+    i.e. the codes that can still narrow down the current search."""
+    codes = sorted(set(c for c in codes if c))
+    key = gender + ":" + ",".join(codes)
+    cached = cooccurrence_cache.get(key)
+    if cached is not None:
+        return cached
+    edge_index = _edge_index if NETWORK_INDEX else None
+    if edge_index is not None:
+        found = edge_index.cooccurring_codes(codes)
+    else:
+        gender_condition = {"$eq": gender} if gender in ["male", "female"] else {"$ne": "all"}
+        query = apply_sex({"data.trajectory_list": {"$all": codes},
+                           "data.gender_trajectories": gender_condition}, gender)
+        found = set(mongo.db[EDGES_COLLECTION].distinct("data.trajectory_list", query))
+    return cooccurrence_cache.set(key, found)
+
+
 def clean_shared_name(name):
     """'NoneS01AE (pp) NoneJ07BA' -> 'S01AE (pp) J07BA' (ptb data); unchanged for srb."""
     return name.replace("None", "") if isinstance(name, str) else name
@@ -249,6 +505,8 @@ def search():
     raw_query = request.args.get('q', '').strip()
     query = re.escape(raw_query)
     gender = request.args.get('g','')
+    # Codes already in the search bar: only suggest codes that share a trajectory with all of them
+    selected = [c for c in request.args.get('with', '').split(',') if c]
     nodes = mongo.db[NODES_COLLECTION]
 
     if gender in ["male","female"]:
@@ -266,6 +524,9 @@ def search():
         ],
         "data.gender_trajectories":gender_condition
     }
+    if selected:
+        allowed = cooccurring_codes(selected, gender) - set(selected)
+        match_stage["data.shared_name"] = {"$in": sorted(allowed)}
 
 
 
@@ -295,7 +556,7 @@ def search():
     ]
 
 
-    key = f"search:{gender}:{raw_query.lower()}"
+    key = f"search:{gender}:{raw_query.lower()}:{','.join(sorted(selected))}"
     cached = response_cache.get(key)
     if cached is not None:
         return app.response_class(cached, mimetype="application/json")
@@ -1023,9 +1284,15 @@ def network(if_capped_length=None,is_capped=False):
         {"$group": {"_id": {"t": "$data.trajectory", "g": "$data.gender_trajectories"}}},
     ]
 
-    results = edges.aggregate(find_edges_with_code_in_trajectory_pipeline)
-
-    parsed_trajectories_sorted_unique = sorted({(r["_id"]["t"], r["_id"].get("g")) for r in results})
+    edge_index = _edge_index if NETWORK_INDEX else None
+    if edge_index is not None:
+        trajectory_ids = edge_index.matching_trajectories(
+            service_registry_codes, min_linear_length, max_linear_length, gender,
+            min_ppl_count, max_ppl_count, min_rr, max_rr)
+        parsed_trajectories_sorted_unique = sorted((t, None) for t in trajectory_ids)
+    else:
+        results = edges.aggregate(find_edges_with_code_in_trajectory_pipeline)
+        parsed_trajectories_sorted_unique = sorted({(r["_id"]["t"], r["_id"].get("g")) for r in results})
     paginated_trajectories = remove_subtrajectories(parsed_trajectories_sorted_unique)
     paginated_trajectories = sorted(chapter_filter(paginated_trajectories,min_ch,max_ch),key=lambda x: len(x.split("_")),reverse=True)
 
@@ -1074,6 +1341,13 @@ def network(if_capped_length=None,is_capped=False):
         {"$group": {"_id": "$data.shared_name", "doc": {"$first": "$$ROOT"}}},
         {"$replaceRoot": {"newRoot": "$doc"}},
     ]
+    if edge_index is not None:
+        # The index already picked the first edge per shared_name: fetch just those
+        edge_ids = edge_index.first_edge_ids(trajectory_ids[t] for t in paginated_trajectories)
+        find_all_edges_from_trajectories_pipeline = [
+            {"$match": {"_id": {"$in": edge_ids}}},
+            find_all_edges_from_trajectories_pipeline[1],
+        ]
     # All edges with data
     all_edges = edges.aggregate(find_all_edges_from_trajectories_pipeline, allowDiskUse=True)
     results = list(all_edges)
