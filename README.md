@@ -44,15 +44,23 @@ Indexes are created automatically when the backend starts.
 
 ## Data
 
-The data is **not** stored in this repository (files exceed GitHub's limits).
-Restore the MongoDB dump into the `srb` database, e.g.:
+The `srb` database is bundled in `data/srb/` as a gzipped MongoDB dump, split
+into parts below GitHub's file-size limit. On the **first** start (empty Mongo
+volume) `docker/mongo-init/10-restore-seed.sh` joins the parts and restores
+them, so this is all you need:
 
 ```bash
-# from a mongodump directory (srb_dump_*/srb/{edges,nodes}.bson)
-mongorestore --uri "mongodb://localhost:27017" --nsInclude "srb.*" srb_dump_22_06/
+git clone -b srb https://github.com/samuelbc010602/disease_trajectory_browsers.git
+cd disease_trajectory_browsers
+docker compose up -d --build      # first start restores ~2.3 M documents (a few minutes)
 ```
 
-Expected collections: `srb.nodes` (~955 docs) and `srb.edges` (~2.26 M docs).
+Follow progress with `docker compose logs -f mongodb` (look for `[seed] done`).
+Machines that already have data in the Mongo volume are not touched.
+
+Expected collections: `srb.nodes` (955 docs) and `srb.edges` (~2.26 M docs).
+To restore into another MongoDB manually: join the parts
+(`cat edges.bson.gz.part* > edges.bson.gz`) and run `mongorestore --gzip --dir <folder>`.
 
 ## Develop the frontend
 
