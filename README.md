@@ -44,16 +44,24 @@ Indexes are created automatically when the backend starts.
 
 ## Data
 
-The data is **not** stored in this repository (files exceed GitHub's limits).
-Restore the MongoDB dump into the `ptb` database, e.g.:
+The `ptb` database is bundled in `data/ptb/` as a gzipped MongoDB dump, split
+into parts below GitHub's file-size limit. On the **first** start (empty Mongo
+volume) `docker/mongo-init/10-restore-seed.sh` joins the parts and restores
+them, so this is all you need:
 
 ```bash
-# from a gzipped mongodump archive
-mongorestore --uri "mongodb://localhost:27017" --gzip --archive=ptb_dump.archive.gz --nsInclude "ptb.*"
+git clone -b ptb https://github.com/samuelbc010602/disease_trajectory_browsers.git
+cd disease_trajectory_browsers
+docker compose up -d --build      # first start restores ~2.2 M documents (a few minutes)
 ```
+
+Follow progress with `docker compose logs -f mongodb` (look for `[seed] done`).
+Machines that already have data in the Mongo volume are not touched.
 
 Expected collections: `ptb.nodes` (858 docs, one per ATC code and sex) and
 `ptb.edges_2500_cap` (~2.21 M docs; every transition has at least 2,501 patients in total).
+To restore into another MongoDB manually: join the parts
+(`cat edges_2500_cap.bson.gz.part* > edges_2500_cap.bson.gz`) and run `mongorestore --gzip --dir <folder>`.
 
 ## Develop the frontend
 

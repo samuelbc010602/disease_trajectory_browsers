@@ -47,6 +47,9 @@ services:
     image: mongo:8.0
     volumes:
       - mongodb-data:/data/db
+      # First start only (empty volume): restore the bundled dump in ./data
+      - ./data:/data-seed:ro
+      - ./docker/mongo-init:/docker-entrypoint-initdb.d:ro
     ports:
       - 27017:27017
 
