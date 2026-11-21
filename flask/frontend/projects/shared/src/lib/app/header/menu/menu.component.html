@@ -1,0 +1,29 @@
+<!-- Only show toolbar/sidebar buttons if a search has been performed -->
+<ng-container *ngIf="sharedService.currentNumberTrajectories > 0 || sharedService.isNetworkedSearchOngoing || sharedService.searchBarItems?.length >= 1">
+  <button mat-icon-button *ngIf="sharedService.toolbarIsOn" color="accent" matTooltip="Hide toolbar" (click)="this.toggleToolbar()">
+    <mat-icon>view_module</mat-icon>
+  </button>
+  <button mat-icon-button *ngIf="!sharedService.toolbarIsOn" matTooltip="Show toolbar" (click)="this.toggleToolbar()">
+    <mat-icon>view_module</mat-icon>
+  </button>
+
+  <button *ngIf="router.url == '/' && sharedService.sideBarIsOpen" matTooltip="Close side panel" mat-icon-button color="accent" (click)="this.toggleMenu()">
+    <mat-icon>tune</mat-icon>
+  </button>
+  <button *ngIf="router.url == '/' && !sharedService.sideBarIsOpen" matTooltip="Open side panel" mat-icon-button (click)="this.toggleMenu()">
+    <mat-icon>tune</mat-icon>
+  </button>
+</ng-container>
+
+
+<nav class="menu-links">
+  <button mat-button class="menu-link" (click)="this.goHelp()"><mat-icon>help_outline</mat-icon><span>Help</span></button>
+  <button mat-button class="menu-link" (click)="this.goAbout()"><mat-icon>info_outline</mat-icon><span>About</span></button>
+  <button mat-button class="menu-link" (click)="this.goChapters()"><mat-icon>palette</mat-icon><span>Chapters</span></button>
+</nav>
+<!--
+<span *ngIf="router.url == '/'">
+  <hr />
+ <button mat-menu-item (click)="toggleToolbar()"><mat-icon><mat-checkbox class="checkbox-icon" [checked]="_showToolbar"></mat-checkbox></mat-icon> Toolbar</button>
+</span>
+-->

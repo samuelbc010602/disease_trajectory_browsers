@@ -1,0 +1,11 @@
+<mat-card *ngIf="(config | async)?.show_supplementary_download">
+  <mat-card-title><strong>{{(config | async)?.supplementary_heading}}</strong></mat-card-title>
+  <mat-card-subtitle>{{(config | async)?.supplementary_text}}</mat-card-subtitle>
+  <mat-card-actions>
+    <button class="full-width-button" color="primary" mat-raised-button [matMenuTriggerFor]="menu" #downloadVisualization><mat-icon style="font-size:20px;position:relative;top:1px">download</mat-icon> Download supplementary data </button>
+    <mat-menu #menu>
+        <button class="menu-item" mat-menu-item (click)="downloadSupplementaryData('men')">Download significant disease pairs for <strong>men</strong></button>
+        <button class="menu-item" mat-menu-item (click)="downloadSupplementaryData('women')">Download significant disease pairs for <strong>women</strong></button>
+    </mat-menu>
+  </mat-card-actions>
+</mat-card>

@@ -1,0 +1,14 @@
+#footer {
+  height: 40px;
+  background-color: var(--srb-green, #233A1B);
+  color: rgba(255, 255, 255, 0.78);
+  text-align: center;
+  line-height: 40px;
+  font-size: 12px;
+  letter-spacing: 0.01em;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+#footer p {
+  position: relative;
+  top: 0;
+}

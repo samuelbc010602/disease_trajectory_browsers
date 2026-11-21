@@ -1,0 +1,27 @@
+/* Customize the dialog container */
+
+/* Customize the title */
+h2[mat-dialog-title] {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+/* Customize the content text */
+mat-dialog-content p {
+  font-size: 1rem;
+  color: #555;
+  line-height: 1.5;
+}
+
+/* Customize the buttons */
+mat-dialog-actions button {
+  color: #1976d2; /* Primary blue */
+  font-weight: 500;
+}
+
+/* Optional: hover effect for button */
+mat-dialog-actions button:hover {
+  background-color: rgba(25, 118, 210, 0.08);
+}

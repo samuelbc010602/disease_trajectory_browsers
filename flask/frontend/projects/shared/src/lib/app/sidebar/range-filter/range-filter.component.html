@@ -1,0 +1,41 @@
+<div class="rf" [class.rf--modified]="isModified">
+  <div class="rf-head">
+    <span class="rf-label">
+      {{ label }}
+      <mat-icon *ngIf="tooltip" class="rf-help" [matTooltip]="tooltip" matTooltipPosition="left">info_outline</mat-icon>
+    </span>
+    <button type="button" class="rf-reset" *ngIf="isModified" (click)="reset()" matTooltip="Reset to full range">
+      <mat-icon>restart_alt</mat-icon>
+    </button>
+  </div>
+
+  <div class="rf-slider">
+    <ngx-slider
+      [value]="low" (valueChange)="onSliderLow($event)"
+      [highValue]="high" (highValueChange)="onSliderHigh($event)"
+      [options]="options"
+      [manualRefresh]="refresh"></ngx-slider>
+  </div>
+
+  <div class="rf-inputs">
+    <label class="rf-field">
+      <span>Min</span>
+      <input #lowInput type="number" inputmode="decimal"
+             [min]="floor" [max]="high" [step]="step"
+             [value]="display(low)"
+             (change)="commitLow(lowInput)"
+             (keydown.enter)="lowInput.blur()" />
+    </label>
+    <span class="rf-dash" aria-hidden="true">–</span>
+    <label class="rf-field">
+      <span>Max</span>
+      <input #highInput type="number" inputmode="decimal"
+             [min]="low" [max]="ceil" [step]="step"
+             [value]="display(high)"
+             (change)="commitHigh(highInput)"
+             (keydown.enter)="highInput.blur()" />
+    </label>
+    <span class="rf-unit" *ngIf="unit">{{ unit }}</span>
+  </div>
+  <p class="rf-hint" *ngIf="hint">{{ hint }}</p>
+</div>

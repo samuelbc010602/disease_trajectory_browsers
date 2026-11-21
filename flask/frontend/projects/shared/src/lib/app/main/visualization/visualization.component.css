@@ -1,0 +1,93 @@
+mat-sidenav-content {
+  overflow: hidden;
+}
+
+/* Exactly the space between header and footer: nothing hides behind the footer
+   or below the window; the sidebar scrolls inside itself. */
+mat-sidenav-container {
+  position: fixed;
+  top: var(--srb-header-h, 100px);
+  bottom: 40px; /* footer */
+  left: 0;
+  right: 0;
+}
+
+/* ---- Sidebar ---- */
+mat-sidenav {
+  width: 320px;
+  display: inline-block;
+  border-left: 1px solid var(--srb-line, #e4e6da) !important;
+  box-shadow: -8px 0 24px -12px rgba(35, 58, 27, 0.25) !important;
+  box-sizing: border-box;
+}
+
+:host ::ng-deep .mat-tab-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+:host ::ng-deep .mat-tab-label {
+  flex: 1 1 0;
+  min-width: 0 !important;
+  height: 44px !important;
+  opacity: 0.75 !important;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+:host ::ng-deep .mat-tab-label-active { opacity: 1 !important; }
+
+:host ::ng-deep .mat-tab-body-content {
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+/* ---- Landing (before first search) ---- */
+.landing {
+  /* centered in the space between header and footer; scrolls only if the window is tiny */
+  display: flex;
+  height: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  animation: landing-in .5s ease-out .15s both;
+}
+
+@keyframes landing-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+.landing-inner {
+  margin: auto;               /* centers vertically + horizontally inside the flex container */
+  width: 100%;
+  max-width: 680px;
+  text-align: center;
+}
+.landing-title {
+  font-size: clamp(22px, 3.2vw, 30px);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--srb-green, #233A1B);
+  margin: 0 0 10px;
+}
+.landing-text {
+  font-size: 15px;
+  line-height: 1.55;
+  color: #4d5545;
+  margin: 0 auto 18px;
+  max-width: 560px;
+}
+.landing-actions { display: flex; justify-content: center; margin-bottom: 14px; }
+.landing-search-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 20px 10px 14px;
+  border: 0; border-radius: 999px;
+  background: var(--srb-green, #233A1B); color: #fff;
+  font: inherit; font-size: 14px; font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 6px 16px -8px rgba(35, 58, 27, 0.6);
+  transition: transform .15s, box-shadow .15s;
+}
+.landing-search-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 22px -10px rgba(35, 58, 27, 0.7); }
+.landing-search-btn mat-icon { font-size: 20px; width: 20px; height: 20px; }

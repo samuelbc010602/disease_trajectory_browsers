@@ -1,0 +1,26 @@
+#cy {
+  /*
+  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  background-color: #fafafa;
+  background-image: url("../../../../../../../projects/dtb/src/assets/images/cpr_logo_opa.png");
+  background-position: bottom 15px right 15px;
+  background-repeat: no-repeat;
+  background-attachment: local;
+  -webkit-tap-highlight-color: #fafafa !important;
+
+   */
+  background-repeat: no-repeat;
+  background-attachment: local;
+  height: 100%;
+  float: left;
+  width: 100%;
+  overflow: hidden;
+  position: absolute;
+  background-color: #fafafa;
+
+}

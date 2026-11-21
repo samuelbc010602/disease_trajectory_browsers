@@ -1,0 +1,25 @@
+<div *ngIf="sharedService.isLinearSearchOngoing || sharedService.isNetworkedSearchOngoing">
+  <mat-card>
+    <mat-card-title><strong>Download</strong></mat-card-title>
+    <mat-card-subtitle>Download your visualization as image or text data files below.</mat-card-subtitle>
+    <mat-card-actions>
+      <button class="full-width-button" color="primary" mat-raised-button [matMenuTriggerFor]="menu" [disabled]="buttons" #downloadVisualization><mat-icon style="font-size:20px;position:relative;top:1px">image</mat-icon> Image as... </button>
+      <mat-menu #menu>
+        <button mat-menu-item (click)="downloadAs('png')">PNG-format (transparent)</button>
+        <button mat-menu-item (click)="downloadAs('jpg')">JPG-format </button>
+      </mat-menu>
+ </mat-card-actions>
+    <mat-card-actions>
+      <button class="full-width-button" color="primary" mat-raised-button [matMenuTriggerFor]="menu2" [disabled]="buttons" #downloadData><mat-icon style="font-size:20px;position:relative;top:1px">cloud_download</mat-icon> Dataset as... </button>
+      <mat-menu #menu2>
+        <button mat-menu-item (click)="downloadAs('json')">JSON-format</button>
+        <button mat-menu-item (click)="downloadAs('csv')">CSV-format</button>
+      </mat-menu>
+    </mat-card-actions>
+    <!--
+//    <mat-card-actions>
+//      <button class="full-width-button" mat-raised-button color="primary" [disabled]="buttons" (click)="openSpreadsheetPage()"><mat-icon style="font-size:20px;position:relative;top:1px">list_alt</mat-icon> View data table</button>
+//    </mat-card-actions>
+// -->
+  </mat-card>
+</div>

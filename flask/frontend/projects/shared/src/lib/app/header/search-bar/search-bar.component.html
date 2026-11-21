@@ -1,0 +1,89 @@
+<div id="search-bar-container" [class.at-top]="sharedService.searchBarIsAtTop">
+
+  <!-- GENDER -->
+  <div id="gender_conf" *ngIf="sharedService.cfg.show_sex_toggle !== false && (!this.sharedService.isNetworkedSearchOngoing && !this.sharedService.isLinearSearchOngoing && this.sharedService.currentNumberTrajectories == 0) || this.sharedService.searchBarItems?.length == 0">
+    <mat-button-toggle-group
+      class="gender-toggle"
+      [(ngModel)]="sharedService.filtersGenderSelected"
+      name="gender"
+      aria-label="Sex selection">
+      <mat-button-toggle value="all">Both</mat-button-toggle>
+      <mat-button-toggle value="male">Men</mat-button-toggle>
+      <mat-button-toggle value="female">Women</mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+
+  <!-- SEARCH -->
+  <div id="search" matAutocompleteOrigin #origin="matAutocompleteOrigin">
+    <mat-icon class="search-icon">search</mat-icon>
+
+    <!-- Selected codes: trajectories must contain ALL of them -->
+    <ul class="code-chips" *ngIf="selectedCodes.length" aria-label="Codes the trajectories are restricted to">
+      <li *ngFor="let item of selectedCodes; let i = index; let last = last" class="code-chip-wrap">
+        <span class="and" *ngIf="i > 0">AND</span>
+        <span class="code-chip" [class.code-chip--first]="i === 0"
+              [matTooltip]="codeChapter(item) + ' : ' + codeLabel(item) + ' (' + item._id + ')'">
+          <span class="chip-dot" [style.background]="codeColor(item)"></span>
+          <span class="chip-text">{{ codeLabel(item) }}</span>
+          <button type="button" class="chip-x" (click)="removeCode(item, $event)"
+                  [attr.aria-label]="'Remove ' + codeLabel(item)">
+            <mat-icon>close</mat-icon>
+          </button>
+        </span>
+      </li>
+    </ul>
+
+    <input
+      #searchInputEl
+      class="search-input"
+      type="search"
+      autocomplete="off"
+      spellcheck="false"
+      [placeholder]="inputPlaceholder"
+      [attr.aria-label]="inputPlaceholder"
+      (keydown)="onInputKeydown($event)"
+      [matAutocomplete]="auto"
+      [matAutocompleteConnectedTo]="origin"
+      [(ngModel)]="searchText"
+      (ngModelChange)="onSearchTextChange($event)"
+      #searchInput="matAutocompleteTrigger"
+    />
+    <span class="search-spinner" *ngIf="dropdownLoader" aria-hidden="true"></span>
+    <button type="button" class="clear-all" *ngIf="selectedCodes.length > 1" (click)="clearAll()"
+            matTooltip="Remove all codes and start over" aria-label="Remove all codes">
+      <mat-icon>backspace</mat-icon>
+    </button>
+
+    <mat-autocomplete
+      #auto="matAutocomplete"
+      class="srb-autocomplete"
+      (optionSelected)="onOptionSelected($event)"
+      [displayWith]="displayFn">
+
+      <mat-option *ngFor="let item of autocompleteItems" [value]="item">
+        <span class="opt-chapter">{{ item.fn.split(' : ')[0] }}</span>
+        <span class="opt-text">{{ item.fn.split(' : ')[1] || item.fn }}</span>
+      </mat-option>
+
+      <mat-option *ngIf="showNoResults && !dropdownLoader" disabled>
+        {{ (config | async)?.no_dropdown_results_text }} "{{ noResultForText }}"
+      </mat-option>
+
+      <mat-option *ngIf="dropdownLoader && autocompleteItems.length === 0" disabled>
+        {{ (config | async)?.dropdown_searching_text || 'Searching…' }}
+      </mat-option>
+    </mat-autocomplete>
+  </div>
+
+  <mat-slide-toggle
+    *ngIf="(sharedService.cfg.network_requires_sex === false
+         || sharedService.filtersGenderSelected === 'male'
+         || sharedService.filtersGenderSelected === 'female')
+         && (sharedService.showNetworkToggleButton || sharedService.currentNumberTrajectories > 0)"
+    [(ngModel)]="this.sharedService.networkToggleButtonOn"
+    (change)="onNetworkViewSlideToggle($event)"
+    class="toggle-slide">
+    <span class="toggle-slide-text">Network view</span>
+  </mat-slide-toggle>
+
+</div>

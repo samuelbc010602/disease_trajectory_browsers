@@ -1,0 +1,31 @@
+/* TOOLBAR */
+.mat-toolbar-row {
+  height: auto;
+  padding: 0px 0px !important;
+  border-bottom: 1px solid rgba(185, 185, 185, 0.5);
+}
+
+.toolbar-height {
+  padding: 12px 16px 11px 16px !important;
+}
+
+/* Form fields */
+:host::ng-deep .mat-form-field-infix{
+  width: 210px !important;
+}
+
+
+@media only screen and (max-width: 1025px) {
+  mat-toolbar-row.toolbar-height {
+    padding: 0px 10px 0px 10px !important;
+  }
+}
+/* Toolbar vertical spacer */
+.spacer {
+  flex: 1 1 auto;
+}
+footer{
+  position: fixed;
+  left: 0 ; right: 0; bottom: 0;
+  height: 40px;
+}

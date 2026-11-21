@@ -1,0 +1,6 @@
+Flask==2.3.3
+flask_pymongo==2.3.0
+gunicorn==20.1.0
+python-dotenv==1.0.0
+pymongo[srv]
+flask_cors

@@ -1,0 +1,30 @@
+<mat-card class="data-information-card">
+  <mat-card-title>Settings</mat-card-title>
+  <mat-card-subtitle>Choose annotation</mat-card-subtitle>
+  <mat-card-content>
+    <mat-form-field>
+      <mat-select class="full-width-select" placeholder="Node annotation" name="nodeAnnotationSelect" [(value)]="this.sharedService.nodeStyle"  [formControl]="nodeSelectControl">
+        <mat-option *ngFor="let nodeAnn of nodeAnnotations" [value]="nodeAnn.value">{{nodeAnn.viewValue}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <br />
+    <mat-form-field>
+      <mat-select class="full-width-select" placeholder="Edge annotation" name="edgeAnnotationSelect" [(value)]="this.sharedService.edgeStyle"  [formControl]="edgeSelectControl">
+        <mat-option *ngFor="let edgeAnn of edgeAnnotations" [value]="edgeAnn.value">{{edgeAnn.viewValue}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <p>&nbsp;</p>
+    <mat-card-subtitle #fontsize>Choose font size</mat-card-subtitle>
+    <mat-form-field>
+      <mat-select class="full-width-select" placeholder="Node font-size" name="nodeFontSizeSelect" [(value)]="this.sharedService.nodeFontSize" [formControl]="nodeFontSizeSelectControl">
+        <mat-option *ngFor="let nodeSize of nodeFontSizes" [value]="nodeSize.value">{{nodeSize.viewValue}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <br />
+    <mat-form-field>
+      <mat-select class="full-width-select" placeholder="Edge font-size" name="edgeFontSizeSelect" [(value)]="this.sharedService.edgeFontSize"  [formControl]="edgeFontSizeSelectControl">
+        <mat-option *ngFor="let edgeSize of edgeFontSizes" [value]="edgeSize.value">{{edgeSize.viewValue}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </mat-card-content>
+</mat-card>

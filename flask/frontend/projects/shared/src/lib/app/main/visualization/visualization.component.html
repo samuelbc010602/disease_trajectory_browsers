@@ -1,0 +1,48 @@
+<mat-sidenav-container hasBackdrop="false">
+  <mat-sidenav position="end" mode="over" [opened]="this.sharedService.sideBarIsOpen"
+               (openedChange)="sharedService.notifySidebarLayout()">
+    <mat-tab-group [(selectedIndex)]="this.sharedService.selectedSidebarTab" #tabgroup
+                   animationDuration="150ms"
+                   (selectedTabChange)="sharedService.notifySidebarLayout()">
+      <mat-tab label="Search">
+        <lib-search-filters></lib-search-filters>
+        <lib-find-node [codes]="this.sharedService.searchBarItemsString"
+                       [networkBthToggled]="this.sharedService.networkToggleButtonOn"
+                       [filterApplied]="this.sharedService.filterApplied"></lib-find-node>
+        <lib-visualization-settings></lib-visualization-settings>
+      </mat-tab>
+      <mat-tab label="Options">
+        <lib-node-edge-meta [elements]="sharedService.selectedElements"
+                            [deselect]="sharedService.deselectedElement"></lib-node-edge-meta>
+        <lib-export-data></lib-export-data>
+        <lib-supp-data-download></lib-supp-data-download>
+        <lib-icd-chapters *ngIf="sharedService.projectName != 'srb'"></lib-icd-chapters>
+        <lib-srb-chapters *ngIf="sharedService.projectName === 'srb'"></lib-srb-chapters>
+      </mat-tab>
+    </mat-tab-group>
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <lib-message-bar></lib-message-bar>
+    <div class="landing" *ngIf="!sharedService.searchBarIsAtTop">
+      <div class="landing-inner">
+        <h1 class="landing-title">{{ sharedService.cfg.landing_title || 'Explore primary care trajectories' }}</h1>
+        <p class="landing-text">
+          {{ sharedService.cfg.landing_text || 'See how patients move between primary care services across the Danish population. To get started, watch the short guide or start searching for a service in the search bar above.' }}
+        </p>
+        <div class="landing-actions">
+          <button type="button" class="landing-search-btn" (click)="sharedService.focusSearch()">
+            <mat-icon>search</mat-icon> Start searching
+          </button>
+        </div>
+        <lib-search-demo></lib-search-demo>
+      </div>
+    </div>
+    <lib-cytoscape *ngIf="sharedService.searchBarIsAtTop" [elements]="this.elements"
+                   [codes]="this.sharedService.searchBarItemsString"
+                   [filterApplied]="this.sharedService.filterApplied"
+                   [networkBthToggled]="this.sharedService.networkToggleButtonOn"
+                   [nodeStyle]="this.sharedService.nodeStyle" [edgeStyle]="this.sharedService.edgeStyle"
+                   [nodeFontSize]="this.sharedService.nodeFontSize" [edgeFontSize]="this.sharedService.edgeFontSize"
+                   [download]="this.sharedService.exportVisualizationAs"></lib-cytoscape>
+  </mat-sidenav-content>
+</mat-sidenav-container>

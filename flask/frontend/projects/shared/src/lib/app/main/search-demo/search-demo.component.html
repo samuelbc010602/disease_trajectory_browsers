@@ -1,0 +1,76 @@
+<div class="demo-launch" *ngIf="!open">
+  <button type="button" class="launch-btn" (click)="start()">
+    <span class="material-icons">play_circle</span>
+    See how it works
+    <span class="launch-hint">30-second guide</span>
+  </button>
+</div>
+
+<section class="demo" *ngIf="open" aria-label="How to use the browser (guided example)"
+         [class.p1]="phase >= 1" [class.p2]="phase === 2" [class.p3]="phase >= 3"
+         [class.p4]="phase >= 4" [class.p5]="phase >= 5" [class.p6]="phase === 6">
+
+  <ol class="demo-steps">
+    <li *ngFor="let s of steps; let i = index" [class.active]="step === i" [class.done]="step > i">
+      <button type="button" (click)="jump(i)" [attr.aria-label]="'Show step ' + (i + 1)">
+        <span class="num">{{ i + 1 }}</span><span class="txt">{{ s }}</span>
+      </button>
+    </li>
+  </ol>
+
+  <div class="demo-window" aria-hidden="true">
+    <div class="demo-bar">
+      <div class="demo-search">
+        <span class="material-icons">search</span>
+        <span class="demo-chip">{{ phase >= 3 ? chip : '' }}</span>
+        <span class="demo-typed">{{ phase >= 3 ? '' : typed }}</span><span class="demo-caret" *ngIf="phase < 3"></span>
+      </div>
+      <ul class="demo-dropdown">
+        <li *ngFor="let o of options; let i = index" [class.active]="activeOption === i">{{ o }}</li>
+      </ul>
+    </div>
+
+    <div class="demo-stage">
+      <svg class="demo-graph" viewBox="0 0 420 190" role="img">
+        <defs>
+          <marker id="demo-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#8c9483"></path>
+          </marker>
+        </defs>
+        <path *ngFor="let e of edges; let i = index" class="edge" [class.filtered]="e.filtered"
+              [attr.d]="edgePath(e)" pathLength="1" marker-end="url(#demo-arrow)"
+              [style.transition-delay]="(phase >= 3 && phase < 6 ? i * 160 : 0) + 'ms'"></path>
+        <g *ngFor="let n of nodes; let i = index" class="node" [class.filtered]="n.filtered" [class.hit]="n.hit"
+           [style.transition-delay]="(phase >= 3 && phase < 6 ? i * 120 : 0) + 'ms'">
+          <circle *ngIf="n.hit" class="ring" [attr.cx]="n.x" [attr.cy]="n.y" r="19"></circle>
+          <circle [attr.cx]="n.x" [attr.cy]="n.y" r="13" [attr.fill]="n.color"></circle>
+          <text [attr.x]="n.x" [attr.y]="n.y + 30" text-anchor="middle">{{ n.label }}</text>
+        </g>
+      </svg>
+
+      <div class="demo-panel">
+        <div class="demo-panel-title">Filters</div>
+        <div class="demo-panel-label">Relative risk</div>
+        <div class="demo-slider">
+          <div class="track"></div>
+          <div class="sel" [style.left.%]="(rr - 1) / 4 * 100"></div>
+          <div class="knob" [style.left.%]="(rr - 1) / 4 * 100"></div>
+          <div class="knob knob-high"></div>
+        </div>
+        <div class="demo-inputs">
+          <span>{{ rr.toFixed(1) }}</span><span class="dash">–</span><span>62.0</span>
+        </div>
+        <div class="demo-apply">Apply filters</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-controls">
+    <button type="button" class="ctl" (click)="start()" [disabled]="playing">
+      <span class="material-icons">{{ phase === 0 ? 'play_arrow' : 'replay' }}</span>{{ playing ? 'Playing…' : 'Replay' }}
+    </button>
+    <button type="button" class="ctl ctl--ghost" (click)="close()">
+      <span class="material-icons">expand_less</span>Hide guide
+    </button>
+  </div>
+</section>

@@ -1,0 +1,9 @@
+<div class="visualizationMsg">
+  <span *ngIf="sharedService.isLinearSearchOngoing">Found <strong>{{ this.sharedService.currentNumberTrajectories }}</strong> linear trajectories in total.</span>
+  <span *ngIf="_showOverloadWarning">Due to the large number of elements in results, please consider filtering using the side panel options.</span>
+</div>
+
+<mat-paginator *ngIf="this.sharedService.isLinearSearchOngoing" class="paginator" [length]="sharedService.currentNumberTrajectories"  [pageIndex]="sharedService.pageIndex" [pageSize]="pageSize" [pageSizeOptions]="this._pageSizeOptions"
+               [showFirstLastButtons]="true" aria-label="Select page" (page)="this.handlePageEvent($event)"
+               [ngStyle]="{'margin-right':this.sharedService.sideBarIsOpen ? '320px' : '0' }">
+</mat-paginator>

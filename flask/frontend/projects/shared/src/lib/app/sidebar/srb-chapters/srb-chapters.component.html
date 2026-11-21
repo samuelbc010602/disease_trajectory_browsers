@@ -1,0 +1,13 @@
+<mat-card>
+  <mat-card-title>Chapters</mat-card-title>
+  <mat-card-subtitle>Node colours in the graph by {{ noun }} chapter</mat-card-subtitle>
+
+  <ul class="legend">
+    <li class="legend-item" *ngFor="let c of chapters" [class.off]="!c.inData"
+        [matTooltip]="c.inData ? 'Codes starting with ' + c.code : 'Not included in the browser data'">
+      <span class="dot" [style.background]="c.color"></span>
+      <span class="name">{{ c.name }}</span>
+      <span class="code">{{ c.code }}</span>
+    </li>
+  </ul>
+</mat-card>

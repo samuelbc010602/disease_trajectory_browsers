@@ -1,0 +1,66 @@
+<mat-card class="data-information-card filters-card">
+  <div class="filters-header">
+    <mat-card-title>Filters</mat-card-title>
+    <button mat-button type="button" class="reset-all" *ngIf="anyModified" (click)="resetAll()">
+      Reset all
+    </button>
+  </div>
+
+  <mat-card-content>
+    <lib-range-filter
+      label="Trajectory length"
+      tooltip="Number of services connected in a row (length of the linear trajectory)"
+      [floor]="defaults.minTrajectoryLength" [ceil]="defaults.maxTrajectoryLength" [step]="1"
+      [(low)]="sharedService.minTrajectoryLength_temp"
+      [(high)]="sharedService.maxTrajectoryLength_temp"></lib-range-filter>
+
+    <lib-range-filter
+      label="Relative risk"
+      tooltip="Relative risk of the second service given the first, for each pair in the trajectory"
+      [floor]="defaults.minRelativeRisk" [ceil]="defaults.maxRelativeRisk" [step]="0.1" [logScale]="true"
+      [(low)]="sharedService.minRelativeRisk_temp"
+      [(high)]="sharedService.maxRelativeRisk_temp"></lib-range-filter>
+
+    <lib-range-filter
+      label="Different chapters"
+      tooltip="Number of distinct chapters (specialties) a trajectory passes through"
+      [floor]="defaults.minChapters" [ceil]="defaults.maxChapters" [step]="1"
+      [(low)]="sharedService.minChapters_temp"
+      [(high)]="sharedService.maxChapters_temp"></lib-range-filter>
+
+    <lib-range-filter
+      [label]="patientsLabel"
+      [tooltip]="patientsTooltip"
+      unit="× 1,000"
+      [floor]="0" [ceil]="patientsCeilK" [step]="1" [logScale]="true"
+      [hint]="patientsHint"
+      [low]="patientsLowK" (lowChange)="patientsLowK = $event"
+      [high]="patientsHighK" (highChange)="patientsHighK = $event"></lib-range-filter>
+
+    <div class="codes">
+      <p class="codes-title">
+        Additional codes
+        <mat-icon class="help" matTooltip="Trajectories must contain all of these codes. Remove a code to widen the search.">info_outline</mat-icon>
+      </p>
+      <div class="codes-list" *ngIf="(sharedService.searchBarItems || []).length > 1; else noCodes">
+        <span class="code-chip" *ngFor="let item of sharedService.searchBarItems.slice(1)" [matTooltip]="item.fn">
+          <span class="code-text">{{ item.fn.split(" : ")[1] || item.fn }}</span>
+          <button type="button" class="code-remove" (click)="removeSearchItem(item)" aria-label="Remove code">
+            <mat-icon>close</mat-icon>
+          </button>
+        </span>
+      </div>
+      <ng-template #noCodes>
+        <p class="codes-empty">Add more codes from the search bar to narrow down trajectories.</p>
+      </ng-template>
+    </div>
+  </mat-card-content>
+
+  <mat-card-actions class="filters-actions">
+    <p class="pending" *ngIf="hasPendingChanges">Filters changed — apply to update the graph</p>
+    <button class="full-width-button apply-btn" [class.apply-btn--pending]="hasPendingChanges"
+            #applyfilterbtn mat-raised-button color="primary" (click)="applyFilter($event)">
+      <mat-icon>filter_alt</mat-icon> Apply filters
+    </button>
+  </mat-card-actions>
+</mat-card>

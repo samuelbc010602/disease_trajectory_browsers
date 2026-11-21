@@ -1,0 +1,190 @@
+/* You can add global styles to this file, and also import other style files
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+*/
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, sub, sup, tt, var,
+dl, dt, dd, ol, ul, li,
+fieldset, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+ftime, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block;
+}
+html{
+  background-color: #F4F5E6; /* #25324d */
+  height: 100% !important;
+  min-width: 100%;
+  width: fit-content;
+}
+body {
+  line-height: 1;
+  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
+  min-height:calc(100vh - 40px);
+  position:relative;
+  padding-bottom:40px;
+  display: flex;
+  flex-direction: column;
+}
+p {
+  line-height:120%;
+}
+
+ol, ul {
+  list-style: none;
+}
+
+.srb_icon_colour{
+  color: #FFFFFF;
+}
+
+blockquote, q {
+  quotes: none;
+}
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+lib-logo {
+  height: fit-content;
+  display: contents;
+}
+
+footer{
+  z-index: 1;
+}
+
+/* =====================================================================
+   Design tokens + global polish
+   ===================================================================== */
+:root {
+  --srb-green: #233A1B;
+  --srb-green-2: #34532a;
+  --srb-cream: #F4F5E6;
+  --srb-accent: #c75b12;
+  --srb-ink: #1d2a18;
+  --srb-muted: #7b8574;
+  --srb-line: #e4e6da;
+  --srb-line-strong: #cfd3c2;
+  --srb-radius: 12px;
+}
+
+body { color: var(--srb-ink); }
+
+::selection { background: rgba(199, 91, 18, 0.22); }
+
+/* Thin, unobtrusive scrollbars (sidebar, dropdowns) */
+* { scrollbar-width: thin; scrollbar-color: #c9cdb9 transparent; }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb { background: #c9cdb9; border-radius: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+
+/* ---- Sidebar cards ---- */
+.mat-sidenav .mat-card {
+  text-align: left !important;
+  border-radius: var(--srb-radius) !important;
+  border: 1px solid var(--srb-line);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+  padding: 14px 14px 12px !important;
+  margin-bottom: 12px !important;
+}
+.mat-sidenav .mat-card-title {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em;
+  margin-bottom: 4px !important;
+  color: var(--srb-ink);
+}
+.mat-sidenav .mat-card-subtitle {
+  font-size: 12px !important;
+  color: var(--srb-muted) !important;
+  margin-bottom: 8px !important;
+}
+.mat-sidenav .mat-form-field { width: 100%; }
+
+/* ---- Autocomplete panel (rendered in an overlay, so styled globally) ---- */
+.srb-autocomplete.mat-autocomplete-panel {
+  border-radius: 12px !important;
+  margin-top: 6px;
+  max-height: 360px !important;
+  box-shadow: 0 14px 36px -10px rgba(0, 0, 0, 0.28) !important;
+}
+.srb-autocomplete .mat-option {
+  height: auto !important;
+  line-height: 1.3 !important;
+  padding: 8px 16px !important;
+  border-bottom: 1px solid #f0f1ea;
+}
+.srb-autocomplete .mat-option:last-child { border-bottom: 0; }
+.srb-autocomplete .mat-option-text { display: flex; flex-direction: column; gap: 2px; white-space: normal; }
+.srb-autocomplete .opt-chapter {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--srb-muted);
+}
+.srb-autocomplete .opt-text { font-size: 14px; color: var(--srb-ink); }
+.srb-autocomplete .mat-option.mat-active,
+.srb-autocomplete .mat-option:hover:not(.mat-option-disabled) { background: #eef0e4 !important; }
+
+/* ---- Tooltips ---- */
+.mat-tooltip { font-size: 12px !important; line-height: 1.35; padding: 6px 10px !important; max-width: 260px !important; }
+
+/* ---- Loading dialog ---- */
+.custom-dialog-container .mat-dialog-container { border-radius: 14px; }
+.mat-progress-bar-fill::after { background-color: var(--srb-accent) !important; }
+.mat-progress-bar-buffer { background-color: #f3e2d6 !important; }
+
+/* ---- Paginator / message bar ---- */
+.mat-paginator { background: transparent !important; }
+.visualizationMsg { font-size: 13px; color: var(--srb-ink); padding: 12px 16px !important; }
+
+/* ---- Focus visibility ---- */
+button:focus-visible, a:focus-visible { outline: 2px solid var(--srb-accent); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+
+/* ---- Layered surfaces: header / tools row / page / sidebar ---- */
+.mat-toolbar.mat-primary {
+  background: #fdfdf8 !important;          /* header: near-white */
+  color: var(--srb-ink);
+}
+.toolbar-row {
+  border-bottom: 3px solid var(--srb-accent) !important;   /* tools row: deep green + accent edge */
+}
+.toolbar-row:empty, .toolbar-row:has(lib-toolbar:empty) { border-bottom: 0 !important; }
+.mat-sidenav-content { background-color: var(--srb-cream) !important; }   /* page */
+.mat-sidenav { background-color: #ebeddf !important; }                     /* sidebar: one shade darker */
+.mat-sidenav .mat-tab-header { background: var(--srb-green); }
+#cy { background-color: #fcfcf8 !important; }                             /* graph canvas */

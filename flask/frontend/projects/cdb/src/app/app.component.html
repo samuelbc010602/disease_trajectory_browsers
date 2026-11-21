@@ -1,0 +1,13 @@
+<header>
+  <mat-toolbar color="primary">
+    <mat-toolbar-row  class="toolbar-height">
+      <lib-logo></lib-logo><span class="spacer"></span><lib-search-bar [@searchBarIsAtTop]="this.sharedService.searchBarIsAtTop"></lib-search-bar><span class="spacer"></span><lib-menu></lib-menu>
+    </mat-toolbar-row>
+    <mat-toolbar-row class="toolbar" *ngIf="this.sharedService.toolbarIsOn"><lib-toolbar></lib-toolbar></mat-toolbar-row>
+  </mat-toolbar>
+  <lib-message-bar></lib-message-bar>
+</header>
+<router-outlet></router-outlet>
+<footer>
+  <lib-footer-text></lib-footer-text>
+</footer>

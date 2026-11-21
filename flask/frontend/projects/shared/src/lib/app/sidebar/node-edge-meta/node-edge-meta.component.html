@@ -1,0 +1,109 @@
+<div *ngIf="sharedService.isSingleElementSelected && !sharedService.areMultipleElementsSelected">
+
+  <!-- ================= NODE ================= -->
+  <mat-card class="meta-card" *ngIf="nodeType && nodeData">
+    <div class="meta-kicker">{{ sharedService.cfg.item_noun || 'service' }}</div>
+    <div class="node-head">
+      <span class="node-badge" [style.background]="chapterOf(nodeData.shared_name).color"></span>
+      <div class="node-titles">
+        <h3 class="node-title">{{ nodeData.subgroup || nodeData.diagnose_text }}</h3>
+        <div class="node-sub">
+          <span class="chapter-pill" [style.border-color]="chapterOf(nodeData.shared_name).color">
+            {{ chapterOf(nodeData.shared_name).name || nodeData.chapter_description }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <dl class="facts">
+      <div><dt>{{ sharedService.cfg.code_label || 'Service code' }}</dt><dd class="mono">{{ nodeData.shared_name }}</dd></div>
+      <div *ngIf="aux?.sex"><dt>Population</dt><dd>{{ sexLabel(aux.sex) }}</dd></div>
+      <div *ngIf="aux && aux.trajectoriesInView > 1"><dt>Trajectories in view</dt><dd>{{ aux.trajectoriesInView }}</dd></div>
+    </dl>
+
+    <!-- Trajectory this node belongs to (linear view) -->
+    <section *ngIf="aux?.steps?.length > 1" class="block">
+      <h4>Trajectory</h4>
+      <ol class="path">
+        <li *ngFor="let st of aux.steps" [class.current]="st.code === nodeData.shared_name">
+          <span class="dot" [style.background]="chapterOf(st.code).color"></span>
+          <span class="path-name">{{ st.name }}</span>
+          <span class="path-chapter">{{ chapterOf(st.code).name }}</span>
+        </li>
+      </ol>
+    </section>
+
+    <!-- Transitions in the current view -->
+    <section *ngIf="aux?.before?.length" class="block">
+      <h4>Comes after</h4>
+      <ul class="links">
+        <li *ngFor="let n of aux.before">
+          <span class="dot" [style.background]="chapterOf(n.code).color"></span>
+          <span class="link-name">{{ n.name }}</span>
+          <span class="link-stats">{{ fmtInt(n.patients) }} pts · RR {{ fmtRR(n.rr) }}</span>
+        </li>
+      </ul>
+    </section>
+    <section *ngIf="aux?.after?.length" class="block">
+      <h4>Followed by</h4>
+      <ul class="links">
+        <li *ngFor="let n of aux.after">
+          <span class="dot" [style.background]="chapterOf(n.code).color"></span>
+          <span class="link-name">{{ n.name }}</span>
+          <span class="link-stats">{{ fmtInt(n.patients) }} pts · RR {{ fmtRR(n.rr) }}</span>
+        </li>
+      </ul>
+    </section>
+  </mat-card>
+
+  <!-- ================= EDGE ================= -->
+  <mat-card class="meta-card" *ngIf="!nodeType && edgeData">
+    <div class="meta-kicker">Transition</div>
+
+    <div class="edge-flow">
+      <div class="edge-end">
+        <span class="dot" [style.background]="chapterOf(sourceName).color"></span>
+        <div>
+          <div class="end-name">{{ sourceText }}</div>
+          <div class="end-chapter">{{ chapterOf(sourceName).name || sourceChapter }} · <span class="mono">{{ sourceName }}</span></div>
+        </div>
+      </div>
+      <div class="edge-arrow" aria-hidden="true">
+        <span class="line"></span>
+        <span class="when" *ngIf="edgeData.time_days_delta !== undefined">after {{ fmtDuration(edgeData.time_days_delta) }}</span>
+      </div>
+      <div class="edge-end">
+        <span class="dot" [style.background]="chapterOf(targetName).color"></span>
+        <div>
+          <div class="end-name">{{ targetText }}</div>
+          <div class="end-chapter">{{ chapterOf(targetName).name || targetChapter }} · <span class="mono">{{ targetName }}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <strong>{{ fmtRR(edgeData.relativerisk) }}</strong>
+        <span>Relative risk</span>
+      </div>
+      <div class="stat">
+        <strong>{{ fmtInt(edgeData.patient_count) }}</strong>
+        <span>Patients</span>
+      </div>
+    </div>
+
+    <dl class="facts">
+      <div><dt>p-value</dt><dd class="mono">{{ fmtP(edgeData.pvalue) }}</dd></div>
+      <div *ngIf="edgeData.pvalue_dir !== undefined"><dt>p-value (direction)</dt><dd class="mono">{{ fmtP(edgeData.pvalue_dir) }}</dd></div>
+      <div *ngIf="edgeData.time_days_delta !== undefined"><dt>Time between services</dt><dd>{{ fmtDuration(edgeData.time_days_delta) }}</dd></div>
+      <div *ngIf="edgeData.age_days !== undefined"><dt>Age</dt><dd>{{ fmtYears(edgeData.age_days) }}</dd></div>
+      <div *ngIf="edgeData.gender_trajectories"><dt>Population</dt><dd>{{ sexLabel(edgeData.gender_trajectories) }}</dd></div>
+      <div *ngIf="edgeData.male_patient_count !== undefined && edgeData.male_patient_count !== null"><dt>Men</dt><dd>{{ fmtInt(edgeData.male_patient_count) }}</dd></div>
+      <div *ngIf="edgeData.female_patient_count !== undefined && edgeData.female_patient_count !== null"><dt>Women</dt><dd>{{ fmtInt(edgeData.female_patient_count) }}</dd></div>
+      <div *ngIf="edgeData.death !== undefined && edgeData.death !== null"><dt>Deaths</dt><dd>{{ fmtInt(edgeData.death) }}</dd></div>
+      <div *ngIf="edgeData.trajectory_length"><dt>Trajectory length</dt><dd>{{ edgeData.trajectory_length }} services</dd></div>
+    </dl>
+  </mat-card>
+
+  <div class="meta-loading" *ngIf="loading">Loading details…</div>
+</div>

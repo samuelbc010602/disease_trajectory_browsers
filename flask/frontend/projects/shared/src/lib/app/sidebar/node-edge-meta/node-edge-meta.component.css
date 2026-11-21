@@ -1,0 +1,113 @@
+.meta-card { text-align: left !important; }
+
+.meta-kicker {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--srb-muted, #7b8574);
+  margin-bottom: 8px;
+}
+
+/* ---- node header ---- */
+.node-head { display: flex; gap: 12px; align-items: flex-start; }
+.node-badge {
+  flex: none;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px #fff, 0 0 0 5px #e4e6da;
+  margin: 4px 2px 0 4px;
+}
+.node-titles { min-width: 0; }
+.node-title { margin: 0 0 6px; font-size: 16px; font-weight: 600; line-height: 1.25; color: var(--srb-ink, #1d2a18); }
+.chapter-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1.5px solid;
+  font-size: 11.5px;
+  color: #3c4535;
+  background: #fafbf6;
+}
+
+/* ---- key/value facts ---- */
+.facts { margin: 14px 0 0; display: grid; gap: 6px; }
+.facts > div { display: flex; justify-content: space-between; gap: 10px; font-size: 12.5px; }
+.facts dt { color: var(--srb-muted, #7b8574); }
+.facts dd { margin: 0; color: var(--srb-ink, #1d2a18); font-weight: 500; text-align: right; }
+.mono { font-variant-numeric: tabular-nums; font-family: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+
+/* ---- sections ---- */
+.block { margin-top: 16px; }
+.block h4 {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--srb-muted, #7b8574);
+}
+.dot { flex: none; width: 10px; height: 10px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); }
+
+/* trajectory path */
+.path { list-style: none; margin: 0; padding: 0; position: relative; }
+.path::before {
+  content: ''; position: absolute; left: 4px; top: 8px; bottom: 8px; width: 2px; background: #e1e4d6;
+}
+.path li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 10px 1fr;
+  column-gap: 10px;
+  padding: 4px 6px 4px 0;
+  font-size: 12.5px;
+  border-radius: 6px;
+}
+.path li .dot { margin-top: 3px; }
+.path-name { color: var(--srb-ink, #1d2a18); line-height: 1.3; }
+.path-chapter { grid-column: 2; font-size: 11px; color: var(--srb-muted, #7b8574); }
+.path li.current { background: #fff4ec; }
+.path li.current .path-name { font-weight: 600; }
+.path li.current .dot { box-shadow: 0 0 0 3px rgba(199, 91, 18, .35); }
+
+/* neighbour links */
+.links { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.links li {
+  display: grid;
+  grid-template-columns: 10px 1fr;
+  column-gap: 8px;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: #f6f7f0;
+  font-size: 12.5px;
+}
+.link-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.link-stats { grid-column: 2; font-size: 11px; color: var(--srb-muted, #7b8574); font-variant-numeric: tabular-nums; }
+
+/* ---- edge ---- */
+.edge-flow { display: flex; flex-direction: column; gap: 4px; }
+.edge-end { display: flex; gap: 10px; align-items: flex-start; }
+.edge-end .dot { width: 14px; height: 14px; margin-top: 2px; }
+.end-name { font-size: 14px; font-weight: 600; line-height: 1.3; }
+.end-chapter { font-size: 11.5px; color: var(--srb-muted, #7b8574); }
+.edge-arrow { display: flex; align-items: center; gap: 8px; padding-left: 5px; min-height: 26px; }
+.edge-arrow .line {
+  position: relative; width: 3px; height: 22px; border-radius: 2px; background: var(--srb-green, #233A1B);
+}
+.edge-arrow .line::after {
+  content: ''; position: absolute; left: -4px; bottom: -5px;
+  border-left: 5.5px solid transparent; border-right: 5.5px solid transparent; border-top: 7px solid var(--srb-green, #233A1B);
+}
+.edge-arrow .when { font-size: 11.5px; color: #4d5545; }
+
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+.stat {
+  padding: 10px; border-radius: 10px;
+  background: #f4f5e6; border: 1px solid #e4e6da;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.stat strong { font-size: 18px; font-weight: 600; color: var(--srb-green, #233A1B); font-variant-numeric: tabular-nums; }
+.stat span { font-size: 11px; color: var(--srb-muted, #7b8574); }
+
+.meta-loading { font-size: 12px; color: var(--srb-muted, #7b8574); padding: 4px 6px; }

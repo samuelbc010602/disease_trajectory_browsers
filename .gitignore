@@ -1,0 +1,48 @@
+# ---------------------------------------------------------------
+# Dependencies & environments (reinstall with `npm install` in
+# flask/frontend and `pip install -r requirements.txt`)
+# ---------------------------------------------------------------
+node_modules/
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+
+# Angular build cache
+.angular/
+
+# ---------------------------------------------------------------
+# Logs
+# ---------------------------------------------------------------
+logs/
+*.log
+
+# ---------------------------------------------------------------
+# Live MongoDB data directories (binary, machine specific).
+# Share data as JSON exports or mongodump archives instead.
+# ---------------------------------------------------------------
+mongodb/*/WiredTiger*
+mongodb/*/*.wt
+mongodb/*/*.lock
+mongodb/*/journal/
+mongodb/*/diagnostic.data/
+mongodb/*/_mdb_catalog.wt
+
+# ---------------------------------------------------------------
+# Secrets / local config
+# ---------------------------------------------------------------
+.env
+.env.*
+*.pem
+
+# ---------------------------------------------------------------
+# OS & editors
+# ---------------------------------------------------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Local reference files
+ydelse_documentation.tsv

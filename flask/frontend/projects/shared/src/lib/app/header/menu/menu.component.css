@@ -1,0 +1,14 @@
+
+:host { display: inline-flex; align-items: center; gap: 2px; }
+.menu-links { display: inline-flex; align-items: center; gap: 2px; }
+.menu-link {
+  color: var(--srb-green, #233A1B) !important;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 999px !important;
+  padding: 0 12px !important;
+  line-height: 34px !important;
+}
+.menu-link:hover { background: rgba(35, 58, 27, 0.08); }
+.menu-link mat-icon { font-size: 18px; width: 18px; height: 18px; vertical-align: -4px; margin-right: 4px; }
+@media (max-width: 1025px) { .menu-link span { display: none; } }

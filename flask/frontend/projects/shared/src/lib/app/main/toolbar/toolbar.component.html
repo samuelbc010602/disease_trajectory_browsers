@@ -1,0 +1,20 @@
+<!--
+  <span> <span style="position:relative;padding-left:20px !important;padding-right:0px;top:-1px!important;font-size:14px;vertical-align:baseline">TOOLBAR</span> &nbsp; &nbsp; <label style="color:#f1f1f1"><i>No tools available, please search first...</i></label></span>
+    //-->
+<ng-container *ngIf="sharedService.isLinearSearchOngoing || sharedService.isNetworkedSearchOngoing">
+<span class="divide">
+      <label class="label-one">Zoom</label>
+      <button mat-icon-button class="large-mat-button" (click)="zoomCytoscape(0.15)" matTooltip="Zoom in"><mat-icon class="srb_icon_colour">zoom_in</mat-icon> <label>Zoom In</label></button>&nbsp;
+      <button mat-icon-button class="large-mat-button" (click)="zoomCytoscape(-0.15)" matTooltip="Zoom out"><mat-icon class="srb_icon_colour">zoom_out</mat-icon> <label>Zoom Out</label></button>
+      <button mat-icon-button class="large-mat-button" (click)="zoomCytoscape(0)" matTooltip="Zoom to fit screen"><mat-icon class="srb_icon_colour">zoom_out_map</mat-icon> <label> Fit to Screen</label></button>&nbsp;
+    </span>
+<span class="divide-one">
+     <span>
+       <label class="label-one">Highlight/Select</label>
+       <button mat-icon-button class="large-mat-button" (click)="markIncomingNodes()" matTooltip="Select all backward-going edges/nodes starting from the currently selected node(s)"><mat-icon class="srb_icon_colour">navigate_before</mat-icon> <label> Incoming Edges</label></button>
+       <button mat-icon-button class="large-mat-button" (click)="markOutgoingNodes()" matTooltip="Select all forward-going edges/nodes starting from the currently selected node(s)"><mat-icon class="srb_icon_colour">navigate_next</mat-icon> <label> Outgoing Edges</label></button>
+       <button mat-icon-button class="large-mat-button" (click)="markInverse()" matTooltip="Selects the opposite of what is currently selected"><mat-icon class="srb_icon_colour">select_all</mat-icon> <label> Select Inverse</label></button>
+       <button mat-icon-button class="large-mat-button" (click)="markTrajectory()" matTooltip="Selects all nodes in trajectory"><mat-icon class="srb_icon_colour">compare_arrows</mat-icon> <label> Select trajectory</label></button>
+     </span>
+   </span>
+</ng-container>

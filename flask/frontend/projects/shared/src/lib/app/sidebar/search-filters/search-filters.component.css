@@ -1,0 +1,118 @@
+.filters-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.reset-all {
+  font-size: 12px;
+  color: var(--srb-accent, #c75b12);
+  min-width: 0;
+  padding: 0 8px;
+  line-height: 28px;
+}
+
+.codes { padding: 14px 4px 4px; text-align: left; }
+
+.codes-title {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  margin: 0 0 8px;
+  color: var(--srb-ink, #1d2a18);
+}
+
+.help {
+  font-size: 15px;
+  width: 15px;
+  height: 15px;
+  color: var(--srb-muted, #7b8574);
+  cursor: help;
+}
+
+.codes-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.code-chip {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  gap: 2px;
+  padding: 3px 4px 3px 10px;
+  border-radius: 999px;
+  background: #eef0e4;
+  border: 1px solid #d9ddca;
+  font-size: 12px;
+  color: var(--srb-ink, #1d2a18);
+}
+
+.code-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.code-remove {
+  flex: none;
+  border: 0;
+  background: transparent;
+  padding: 2px;
+  border-radius: 50%;
+  cursor: pointer;
+  line-height: 0;
+  color: #6a7362;
+}
+.code-remove:hover { background: rgba(0, 0, 0, 0.08); color: #000; }
+.code-remove mat-icon { font-size: 15px; width: 15px; height: 15px; }
+
+.codes-empty {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--srb-muted, #7b8574);
+}
+
+.filters-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 0 0 !important;
+  margin: 0 !important;
+}
+
+.pending {
+  margin: 0;
+  font-size: 12px;
+  color: var(--srb-accent, #c75b12);
+  text-align: center;
+}
+
+.apply-btn {
+  width: 100%;
+  height: 40px;
+  border-radius: 8px !important;
+  background: var(--srb-green, #233A1B) !important;
+  color: #fff !important;
+  transition: box-shadow .2s, transform .1s;
+}
+.apply-btn mat-icon { font-size: 18px; width: 18px; height: 18px; vertical-align: -3px; margin-right: 4px; }
+.apply-btn:active { transform: translateY(1px); }
+.apply-btn--pending {
+  box-shadow: 0 0 0 3px rgba(199, 91, 18, 0.35) !important;
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(199, 91, 18, 0.35); }
+  50% { box-shadow: 0 0 0 6px rgba(199, 91, 18, 0.12); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .apply-btn--pending { animation: none; }
+}

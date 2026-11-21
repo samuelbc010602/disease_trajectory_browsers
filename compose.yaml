@@ -1,0 +1,73 @@
+version: "3.9"
+
+services:
+  # Nginx serves the local webserver
+  nginx-proxy:
+    build: nginx
+    restart: always
+    volumes:
+      - ./nginx/default.conf:/tmp/default.conf
+    environment:
+      - FLASK_SERVER_ADDR=flask-app:5000
+      - SERVER_NAME=primcare.sund.ku.dk
+    command: ./start.sh
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - flask-app
+
+  # Flask app (Gunicorn) serves the Angular + Flask backend
+  flask-app:
+    build:
+      context: flask
+      target: builder
+    restart: always
+    stop_signal: SIGINT
+    volumes:
+      - ./flask/frontend/dist:/home/app/dist
+      - ./flask/app.py:/home/app/app.py
+      - ./logs:/app/logs   # 👈 THIS is where your log mapping goes
+    command: gunicorn -w 3 -t 60 -b 0.0.0.0:5000 app:app --reload --timeout 90 --error-logfile - --log-level debug --access-logfile - --capture-output
+    environment:
+      # Which browser this backend serves (Service Registry Browser)
+      - MONGO_URI=mongodb://mongodb:27017/srb
+      - EDGES_COLLECTION=edges
+      - NODES_COLLECTION=nodes
+      - DIST_DIR=/home/app/dist/srb
+      - SEX_MODE=edge
+      - CHAPTER_PREFIX_LEN=2
+    ports: 
+      - 5000:5000
+    depends_on:
+      - mongodb
+
+  # MongoDB database
+  mongodb:
+    image: mongo:8.0
+    volumes:
+      - mongodb-data:/data/db
+    ports:
+      - 27017:27017
+
+  # Test container for running test_mongo_db.py
+  flask-test:
+    build:
+      context: flask
+      dockerfile: Dockerfile  # use the same Dockerfile as flask-app
+    command: sh -c "python3 test_mongo_db.py"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/srb
+    depends_on:
+      - mongodb
+    networks:
+      - default
+    volumes:
+      - ./flask:/home/app  # mount the Flask folder so test_mongo_db.py is visible
+      
+networks:
+  default:
+    name: xxb_browser_default
+
+volumes:
+  mongodb-data: 
