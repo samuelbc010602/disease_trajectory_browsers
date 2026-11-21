@@ -1,0 +1,43 @@
+/* HEADER — sits above the fixed sidenav container so the landing search bar
+   (offset ~300px down) is never painted underneath it */
+header {
+  position: relative;
+  z-index: 3;
+  box-shadow: 0 1px 0 rgba(35, 58, 27, 0.08), 0 4px 16px -8px rgba(35, 58, 27, 0.25);
+}
+
+.mat-toolbar-row {
+  height: auto;
+  padding: 0 !important;
+  border-bottom: 0;
+}
+
+.toolbar-height {
+  padding: 10px 20px !important;
+  gap: 16px;
+}
+
+.toolbar-row {
+  background: linear-gradient(180deg, var(--srb-green-2, #34532a), var(--srb-green, #233A1B));
+  min-height: 0;
+}
+
+:host::ng-deep .mat-form-field-infix {
+  width: 210px !important;
+}
+
+@media only screen and (max-width: 1025px) {
+  mat-toolbar-row.toolbar-height {
+    padding: 6px 10px !important;
+  }
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+footer {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  height: 40px;
+}

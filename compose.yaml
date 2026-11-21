@@ -9,7 +9,7 @@ services:
       - ./nginx/default.conf:/tmp/default.conf
     environment:
       - FLASK_SERVER_ADDR=flask-app:5000
-      - SERVER_NAME=primcare.sund.ku.dk
+      - SERVER_NAME=ptb.sund.ku.dk
     command: ./start.sh
     ports:
       - 80:80
@@ -30,13 +30,13 @@ services:
       - ./logs:/app/logs   # 👈 THIS is where your log mapping goes
     command: gunicorn -w 3 -t 60 -b 0.0.0.0:5000 app:app --reload --timeout 90 --error-logfile - --log-level debug --access-logfile - --capture-output
     environment:
-      # Which browser this backend serves (Service Registry Browser)
-      - MONGO_URI=mongodb://mongodb:27017/srb
-      - EDGES_COLLECTION=edges
+      # Which browser this backend serves (Prescription Trajectory Browser)
+      - MONGO_URI=mongodb://mongodb:27017/ptb
+      - EDGES_COLLECTION=edges_2500_cap
       - NODES_COLLECTION=nodes
-      - DIST_DIR=/home/app/dist/srb
-      - SEX_MODE=edge
-      - CHAPTER_PREFIX_LEN=2
+      - DIST_DIR=/home/app/dist/ptb
+      - SEX_MODE=patient_count
+      - CHAPTER_PREFIX_LEN=1
     ports: 
       - 5000:5000
     depends_on:
