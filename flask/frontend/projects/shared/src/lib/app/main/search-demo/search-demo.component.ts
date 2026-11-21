@@ -33,18 +33,22 @@ export class SearchDemoComponent implements OnInit, OnDestroy {
     'Narrow them down with the filters in the side panel',
   ];
 
+  // Linear view: one row per trajectory, the searched item repeated in each row.
   nodes: DemoNode[] = [
-    { id: 'gp',    x: 34,  y: 92,  color: '#57341f', label: 'General practice' },
-    { id: 'ortho', x: 150, y: 40,  color: '#75cd95', label: 'Orthopaedics' },
-    { id: 'xray',  x: 150, y: 146, color: '#ff9290', label: 'Chest X-ray' },
-    { id: 'phys',  x: 268, y: 92,  color: '#bdb963', label: 'Exercise therapy', hit: true },
-    { id: 'train', x: 386, y: 46,  color: '#bdb963', label: 'Follow-up training' },
-    { id: 'lab',   x: 386, y: 144, color: '#ff9b50', label: 'Lab test', filtered: true },
+    { id: 'gp1',    x: 46,  y: 34,  color: '#57341f', label: 'General practice' },
+    { id: 'ortho1', x: 156, y: 34,  color: '#75cd95', label: 'Orthopaedics' },
+    { id: 'phys1',  x: 266, y: 34,  color: '#bdb963', label: 'Exercise therapy', hit: true },
+    { id: 'train1', x: 374, y: 34,  color: '#bdb963', label: 'Follow-up training' },
+    { id: 'gp2',    x: 46,  y: 92,  color: '#57341f', label: 'General practice' },
+    { id: 'xray2',  x: 156, y: 92,  color: '#ff9290', label: 'Chest X-ray' },
+    { id: 'phys2',  x: 266, y: 92,  color: '#bdb963', label: 'Exercise therapy', hit: true },
+    { id: 'phys3',  x: 46,  y: 150, color: '#bdb963', label: 'Exercise therapy', hit: true, filtered: true },
+    { id: 'lab3',   x: 156, y: 150, color: '#ff9b50', label: 'Lab test', filtered: true },
   ];
   edges: DemoEdge[] = [
-    { from: 'gp', to: 'ortho' }, { from: 'ortho', to: 'phys' }, { from: 'phys', to: 'train' },
-    { from: 'gp', to: 'xray' }, { from: 'xray', to: 'phys' },
-    { from: 'phys', to: 'lab', filtered: true },
+    { from: 'gp1', to: 'ortho1' }, { from: 'ortho1', to: 'phys1' }, { from: 'phys1', to: 'train1' },
+    { from: 'gp2', to: 'xray2' }, { from: 'xray2', to: 'phys2' },
+    { from: 'phys3', to: 'lab3', filtered: true },
   ];
 
   typed = '';
